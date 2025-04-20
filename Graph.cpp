@@ -1,10 +1,19 @@
 #include "Graph.hpp"
+#include "PriorityQueue.hpp"
 
 
 // Destructor implementation
 Graph::~Graph() {
     vertices.clear();
     adjList.clear();
+}
+
+std::string Graph::getName(const int index) const {
+  if (vertices[index] == "EMPTY") {
+    std::cout << "ERROR!" << std::endl;
+    return "ERROR INDEX DOESN\'T MATCH!";
+  }
+  return vertices[index];
 }
 
 //additional function for Graph class: get_index. Takes label as an argument and returns index
@@ -19,7 +28,7 @@ int Graph:: getIndex(const std:: string& label) const {
 
 
 //addVertex function, takes label as an argument and adds a vertex with that label
-void Graph:: addVertex(std::string label) {
+void Graph::addVertex(std::string label) {
     //if already exists
     if (getIndex(label) != -1) return;
     //otherwise, pushback label and new pair to the adjList
@@ -35,7 +44,8 @@ void Graph:: removeVertex(std::string label) {
 
 
     //erasing from vertices and adjList
-    vertices.erase(vertices.begin() + index);
+    /*vertices.erase(vertices.begin() + index);*/
+    vertices[index] = "EMPTY"; // needed to not mess up the indexing when removing vertices
     adjList.erase(adjList.begin() + index);
 
 
@@ -108,4 +118,54 @@ void Graph:: printGraph() const {
         }
         std::cout << "\n";
     }
+}
+
+// indexes should be unique for "dist" and "parent" arrays to work
+// getIndex can be implemented by creating an array with size of MAX_VERTEX_NUMBER
+// string index_to_name[MAX_VERTEX_NUMBER]
+unsigned long Graph::shortestPath(std::string startLabel, std::string endLabel, std::vector<std::string> &path) {
+  // map <string, pair <unsigned long, string> > dist should be created and set to INF
+  const unsigned long INF = 1e9; // 1000000000
+  unsigned long dist[MAX_VERTEX_NUMBER];
+  int parent[MAX_VERTEX_NUMBER];
+  PriorityQueue<std::pair<int, int>> pq;
+
+  for (int i = 0; i < MAX_VERTEX_NUMBER; i++) {
+    dist[i] = INF;
+  }
+  int start_i = getIndex(startLabel);
+  dist[start_i] = 0;
+  parent[start_i] = -1;
+  pq.push({dist[start_i], start_i});
+  while (!pq.empty()) {
+    int cur_index = pq.top().second;
+    unsigned long cur_dist = pq.top().first;
+    pq.pop();
+
+    for (auto edge : adjList[cur_index]) {
+      int next_index = edge.first; // considering that edges will be implemented with parameters {to, weight}
+      unsigned long weight = edge.second;
+      if (dist[next_index] > cur_dist + weight) {
+        dist[next_index] = cur_dist + weight;
+        parent[next_index] = cur_index;
+        pq.push({dist[next_index], next_index});
+      }
+    }
+  }
+
+  int cur_index = getIndex(endLabel);
+  while (cur_index != -1) {
+    path.push_back(getName(cur_index));
+    cur_index = parent[cur_index];
+  }
+
+  int r = path.size() - 1;
+  int l = 0;
+  while (l < r) {
+    std::string temp = path[l];
+    path[l++] = path[r];
+    path[r--] = temp;
+  }
+
+  return dist[getIndex(endLabel)];
 }
