@@ -1,6 +1,12 @@
 #include "Graph.hpp"
 
 
+// Destructor implementation
+Graph::~Graph() {
+    vertices.clear();
+    adjList.clear();
+}
+
 //additional function for Graph class: get_index. Takes label as an argument and returns index
 int Graph:: getIndex(const std:: string& label) const {
    for (int i = 0; i < vertices.size(); i++) {
@@ -93,3 +99,13 @@ void Graph:: removeEdge(std::string label1, std::string label2){
     }
 }
 
+// printGraph function, prints the graph in a readable format for testing purposes
+void Graph:: printGraph() const {
+    for (int i = 0; i < vertices.size(); ++i) {
+        std::cout << vertices[i] << ": ";
+        for (const auto& neighbor : adjList[i]) {
+            std::cout << "(" << vertices[neighbor.first] << ", " << neighbor.second << ") ";
+        }
+        std::cout << "\n";
+    }
+}
