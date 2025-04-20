@@ -8,6 +8,7 @@ Graph::~Graph() {
     adjList.clear();
 }
 
+// getName function, takes index as an argument and returns the name of the vertex at that index
 std::string Graph::getName(const int index) const {
   if (vertices[index] == "EMPTY") {
     std::cout << "ERROR!" << std::endl;
